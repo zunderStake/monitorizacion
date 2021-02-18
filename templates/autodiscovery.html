@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+{% block body%}
+<script type="text/javascript">
+    function cambiarclase(){
+        document.getElementById("loading").className += " fa fa-refresh fa-spin";
+        document.getElementById("text").innerHTML = " Analizando IP";
+    }
+</script>
+    <div class="card card-body">
+        <h1>AUTODISCOVERY</h1>
+        <form action="/search_autodiscovery" method="post">
+            <div class="form-group">
+                <input type="text" name="ip_initial" placeholder="IP Inicial - 192.168.1.1" class="form-control">
+                <input type="text" name="ip_finished" placeholder="IP Final - 192.168.1.255" class="form-control">
+                <button type="submit" id="buscar" onclick="cambiarclase()" class="btn btn-primary btn-block"><i id="loading" class=""></i> <p id="text">Buscar</p></button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
