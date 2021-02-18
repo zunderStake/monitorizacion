@@ -1,0 +1,7 @@
+#Herramienta monitorización multiplaforma con Python+flask+mysql, solución modular y configurable 100% web.
+
+Hitos a corto plazo:
+
+- WEB login
+- Autodiscovery de la red
+- Monitorización disco duro
