@@ -16,10 +16,7 @@ app.secret_key = 'mysecretkey'
 
 @app.route('/')
 def Index():
-    cur_mysql = mysql.connection.cursor()
-    cur_mysql.execute('SELECT * FROM contacts')
-    data = cur_mysql.fetchall()
-    return render_template('add_contact.html', contacts=data)
+    return render_template('index.html')
 
 @app.route('/autodiscovery')
 def AutoDiscovery():
@@ -54,58 +51,47 @@ def Search_AutoDiscovery():
                         else:
                             pingstatus = "Network Error"
                         ip_incrementa += 1
-        flash('Autodiscovery terminado, se han agregado %s IP.',(numero_server))
+                    else:
+                        flash('Autodiscovery terminado')
         return render_template('inventory.html')
 
 @app.route('/inventory')
 def Inventory():
-    return render_template('inventory.html')
-
-@app.route('/add_contact',methods=['POST'])
-def add_contact():
-    if request.method=='POST':
-        fullname = request.form['fullname']
-        phone = request.form['phone']
-        email = request.form['email']
-        cur_mysql = mysql.connection.cursor()
-        cur_mysql.execute('INSERT INTO contacts (fullname, phone, email) VALUES (%s, %s, %s)', (fullname, phone, email))
-        mysql.connection.commit()
-        flash('Contact Added sucessfully')
-        return redirect(url_for('Index'))
-
-@app.route('/edit/<string:id>')
-def get_contact(id):
     cur_mysql = mysql.connection.cursor()
-    cur_mysql.execute('SELECT * FROM contacts WHERE id=%s',(id))
-    mysql.connection.commit()
+    cur_mysql.execute('SELECT * FROM inventory_ip where ACTIVE=1')
     data = cur_mysql.fetchall()
-    return render_template('edit_contact.html', contact=data[0])
+    return render_template('inventory.html', servers=data)
 
-@app.route('/update/<string:id>',methods=['POST'])
+@app.route('/edit_server/<string:id>')
+def get_server(id):
+    cur_mysql = mysql.connection.cursor()
+    cur_mysql.execute('SELECT * FROM inventory_ip WHERE ID_IP={0}'.format(id))
+    data = cur_mysql.fetchall()
+    return render_template('edit_server.html', server=data[0])
+
+@app.route('/update_server/<string:id>',methods=['POST'])
 def update_contact(id):
     if request.method == 'POST':
         fullname = request.form['fullname']
-        phone = request.form['phone']
-        email = request.form['email']
+        ip = request.form['ip']
         cur_mysql = mysql.connection.cursor()
         cur_mysql.execute("""
-        UPDATE contacts 
-        SET fullname = %s,
-            phone = %s,
-            email = %s
-        where id = %s 
-        """, (fullname, phone, email, id))
+        UPDATE inventory_ip 
+        SET IP = %s,
+            NOMBRE = %s
+        where ID_IP = %s 
+        """, (ip, fullname, id))
         mysql.connection.commit()
-        flash('Contact Update sucessfully')
-        return redirect(url_for('Index'))
+        flash('Servidor actualizado correctamente')
+        return redirect(url_for('Inventory'))
 
-@app.route('/delete/<string:id>')
+@app.route('/delete_server/<string:id>')
 def del_contact(id):
     cur_mysql = mysql.connection.cursor()
-    cur_mysql.execute('DELETE FROM contacts where id = {0}'.format(id))
+    cur_mysql.execute('DELETE FROM inventory_ip where ID_IP = {0}'.format(id))
     mysql.connection.commit()
-    flash('Contact Delete sucessfully')
-    return redirect(url_for('Index'))
+    flash('Servidor eliminado correctamente')
+    return redirect(url_for('Inventory'))
 
 if __name__ == '__main__':
  app.run(port = 5050, debug = True)

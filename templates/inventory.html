@@ -1,6 +1,39 @@
 {% extends 'layout.html' %}
 {% block body%}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 <div class="card card-body">
-    LISTADO IP
+    <h3>Listado Servidores descubiertos:</h3>
+    <table class="table table-striped table-bordered bg-white table-sm">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>IP</th>
+                    <th>Cambiar nombre</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for server in servers %}
+                <tr>
+                    <td>{{ server.1 }}</td>
+                    <td>{{ server.2 }}</td>
+                    <td>
+                        <a href="/edit_server/{{server.0}}" class="btn btn-secondary">Cambiar</a>
+                    </td>
+                    <td>
+                        <a href="/delete_server/{{server.0}}" class="btn btn-danger">Eliminar</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+          </table>
 </div>
 {% endblock %}

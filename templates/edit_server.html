@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block body%}
+<div class="col-md-4 offset-md-4">
+    <div class="card card-body">
+        <form action="/update_server/{{ server.0 }}" method="post">
+            <div class="form-group">
+                <b>IP:</b><input type="text" name="ip" placeholder="ip" value="{{ server.2 }}" class="form-control">
+                <b>Nombre Servidor:</b><input type="text" name="fullname" placeholder="Full name" value="{{ server.1 }}" class="form-control">
+                <button type="submit" class="btn btn-primary btn-block">Edit</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
