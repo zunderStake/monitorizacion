@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
-import os, sys
-import subprocess
+import os, sys, subprocess, psutil
+
 
 app = Flask(__name__)
 #mysql conexion
@@ -18,6 +18,7 @@ app.secret_key = 'mysecretkey'
 def Index():
     return render_template('index.html')
 
+#Autodiscovery
 @app.route('/autodiscovery')
 def AutoDiscovery():
     return render_template('autodiscovery.html')
@@ -54,7 +55,7 @@ def Search_AutoDiscovery():
                     else:
                         flash('Autodiscovery terminado')
         return render_template('inventory.html')
-
+#Inventario
 @app.route('/inventory')
 def Inventory():
     cur_mysql = mysql.connection.cursor()
@@ -92,6 +93,48 @@ def del_contact(id):
     mysql.connection.commit()
     flash('Servidor eliminado correctamente')
     return redirect(url_for('Inventory'))
+
+#Dashboard Servidor
+@app.route('/dashboard/<string:id>')
+def dashboard_server(id):
+    cur_mysql = mysql.connection.cursor()
+    cur_mysql.execute('SELECT * FROM thresholds')
+    data_thresholds = cur_mysql.fetchall()
+    cur_mysql = mysql.connection.cursor()
+    cur_mysql.execute('SELECT * FROM inventory_ip WHERE ID_IP={0}'.format(id))
+    data = cur_mysql.fetchall()
+    #USO_CPU
+    cpu=psutil.cpu_percent(interval=1)
+    #MEMORIA
+    vm_memory=psutil.virtual_memory()
+    swap_memory = psutil.swap_memory()
+    #RED
+    red = psutil.net_io_counters(pernic=True)
+    #unidades
+    particiones = psutil.disk_partitions()
+    count_discos = 0
+    discos = []
+    for x in range(0, len(particiones)):
+        #DISCOS
+        disk_usage = psutil.disk_usage(particiones[x][0])
+        nombre_particion = particiones[x][0]
+        #TOTAL_BRUTO
+        disk_total_bruto = str(disk_usage.total / 1024 ** 3)
+        #TOTAL_GB
+        disk_total_gb = format(disk_total_bruto[:disk_total_bruto.index('.') + 2] + "GB")
+        #USADO_BRUTO
+        disk_used_gb_bruto = str(disk_usage.used / 1024 ** 3)
+        #USADO_GB
+        disk_used_gb = format(disk_used_gb_bruto[:disk_used_gb_bruto.index('.') + 2] + "GB")
+        #LIBRE_BRUTO
+        disk_free_gb_bruto = str(disk_usage.free / 1024 ** 3)
+        #LIBRE_GB
+        disk_free_gb = format(disk_free_gb_bruto[:disk_free_gb_bruto.index('.') + 2] + "GB")
+        info_disco = [nombre_particion, disk_total_gb, disk_used_gb, disk_free_gb]
+        discos.append([count_discos, info_disco])
+        count_discos = count_discos + 1
+    print(red)
+    return render_template('dashboard_server.html', thresholds=data_thresholds, server=data[0], numero_particiones=count_discos, discos=discos, cpu=cpu, vm_memory=vm_memory, swap_memory=swap_memory, red=red)
 
 if __name__ == '__main__':
  app.run(port = 5050, debug = True)

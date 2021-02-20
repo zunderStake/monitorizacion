@@ -23,7 +23,7 @@
             <tbody>
             {% for server in servers %}
                 <tr>
-                    <td>{{ server.1 }}</td>
+                    <td><a href="/dashboard/{{server.0}}" class="btn btn-outline-primary">{{ server.1 }}</a></td>
                     <td>{{ server.2 }}</td>
                     <td>
                         <a href="/edit_server/{{server.0}}" class="btn btn-secondary">Cambiar</a>
